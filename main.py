@@ -1,5 +1,4 @@
 import pickle
-import numpy as np
 
 model1 = pickle.load(open('best_lr1.sav', 'rb'))
 vectorizer1 = pickle.load(open('vectorizer1.sav', 'rb'))
