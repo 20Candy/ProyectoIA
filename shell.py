@@ -1,5 +1,11 @@
 import tkinter as tk
 import pickle
+import re
+
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
+from nltk.corpus import stopwords
 
 model1 = pickle.load(open('best_lr1.sav', 'rb'))
 vectorizer1 = pickle.load(open('vectorizer1.sav', 'rb'))
@@ -19,6 +25,21 @@ class ShellSimulator(tk.Frame):
         this.userInput = ""
         this.commandHistory = []
         this.historyPointer = -1
+
+    def remove_urls_mentions_hashtags(this, text):
+        text = text.lower()
+
+        text = re.sub(r'http\S+', '', text) # URLs
+        text = re.sub(r'@\S+', '', text) # Menciones
+        text = re.sub(r'#\S+', '', text) # Hashtags
+
+        text = re.sub('<.*?>', '', text) # HTML tags
+        text = re.sub('[^a-zA-Z]', ' ', text) # Puntuación y números
+
+        stop_words = set(stopwords.words('english'))
+        text = ' '.join([word for word in text.split() if word not in stop_words])
+
+        return text
     
     def keyPress(this, event):
         if event.keysym == "Return":
@@ -99,6 +120,9 @@ class ShellSimulator(tk.Frame):
 
     def execute_command(this, userInput):
         print("\nuserInput: " + userInput+"\n")
+
+        userInput = this.remove_urls_mentions_hashtags(userInput)
+
         running = True
 
         # EXIT ===================================================================================================================
