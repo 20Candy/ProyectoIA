@@ -2,6 +2,9 @@ import tkinter as tk
 import pickle
 import re
 
+import pytesseract
+from PIL import Image
+
 import nltk
 nltk.download('stopwords')
 nltk.download('punkt')
@@ -119,8 +122,17 @@ class ShellSimulator(tk.Frame):
         this.textbox.focus_set()
 
     def execute_command(this, userInput):
-        print("\nuserInput: " + userInput+"\n")
 
+        if userInput.startswith("*img"):
+            image_name = userInput.split(" ")[1]
+            image_dir = "./images/" + image_name + ".jpg"
+
+            image = Image.open(image_dir)
+
+            userInput = pytesseract.image_to_string(image)
+
+        userInput = userInput.replace("Publicar", "")
+        print("\nuserInput: " + userInput+"\n")
         userInput = this.remove_urls_mentions_hashtags(userInput)
 
         running = True
@@ -135,14 +147,14 @@ class ShellSimulator(tk.Frame):
             result = model1.predict(newTweet)
 
             if result[0] == "cyberbullying":
-                this.textbox.insert(tk.END, "\nEl tweet es cyberbullying")
+                this.textbox.insert(tk.END, "\nEl comentario es cyberbullying")
                 newTweet = vectorizer2.transform([userInput]).toarray()
                 result = model2.predict(newTweet)
 
                 resultString = "Tipo de cyberbullying: " + result[0] + "\n"
                 this.textbox.insert(tk.END, "\n" + resultString)
             else:
-                this.textbox.insert(tk.END, "\nEl tweet no es cyberbullying\n")
+                this.textbox.insert(tk.END, "\nEl comentario no es cyberbullying\n")
       
 
 
@@ -153,7 +165,7 @@ class ShellSimulator(tk.Frame):
 
 root = tk.Tk()
 root.configure(bg='black')
-root.title("HBase Simulator")
+root.title("Cyberbulling Detector")
 app = ShellSimulator(master=root)
 app.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 app.textbox.insert(tk.END, "CyberBullying Detector> ")
